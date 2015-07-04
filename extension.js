@@ -111,6 +111,38 @@ const MONTHS = [
   'december',
 ];
 
+const HOURS_LIST = [
+    _("%0 o'clock"),
+    _("five past %0"),
+    _("ten past %0"),
+    _("quarter past %0"),
+    _("twenty past %0"),
+    _("twenty five past %0"),
+    _("half past %0"),
+    _("twenty five to %1"),
+    _("twenty to %1"),
+    _("quarter to %1"),
+    _("ten to %1"),
+    _("five to %1"),
+    _("%1 o'clock")
+]
+
+const HOUR_NAMES = [
+    _("twelve"),
+    _("one"),
+    _("two"),
+    _("three"),
+    _("four"),
+    _("five"),
+    _("six"),
+    _("seven"),
+    _("eight"),
+    _("nine"),
+    _("ten"),
+    _("eleven"),
+    _("twelve")
+]
+
 const WORDS = {
   it_is: 'it is',
   it_is_a: 'it is a',
@@ -185,42 +217,46 @@ function timeToWords(hours, minutes) {
     let wordMinutes = minutes;
     let res = '';
 
-    if (wordMinutes != 0) {
-        if (wordMinutes == 15) {
-            res = WORDS.it_is_a + ' ' + WORDS.quarter + ' ' + WORDS.past + ' ';
-        }
-        else if (wordMinutes == 45) {
-            res = WORDS.it_is_a + ' ' + WORDS.quarter + ' ' + WORDS.to + ' ';
-            wordHours = (wordHours + 1) % 24;
-        }
-        else if (wordMinutes == 30) {
-            res = WORDS.it_is + ' ' + WORDS.half + ' ' + WORDS.past + ' ';
-        }
-        else if (wordMinutes < 30) {
-            res = WORDS.it_is + ' ' + appendNumber(wordMinutes) + ' ' + WORDS.past + ' ';
-        }
-        else {
-            res = WORDS.it_is + ' ' + appendNumber(60 - wordMinutes) + ' ' + WORDS.to + ' ';
-            wordHours = (wordHours + 1) % 24;
-        }
-    }
-    else {
-        res = WORDS.it_is + ' ';
-    }
+    res = HOURS_LIST[Math.round(wordMinutes / 5)]
+        .replace("%0", HOUR_NAMES[wordHours >= 12 ? wordHours - 12 : wordHours])
+        .replace("%1", HOUR_NAMES[wordHours + 1 >= 12 ? wordHours + 1 - 12 : wordHours + 1]);
 
-    if (wordHours == 0) {
-        res += WORDS.midnight;
-    }
-    else if (wordHours == 12) {
-        res += WORDS.noon;
-    }
-    else {
-        res += appendNumber(wordHours % 12);
-    }
+    // else if (wordMinutes != 0) {
+    //     if (wordMinutes == 15) {
+    //         res = WORDS.it_is_a + ' ' + WORDS.quarter + ' ' + WORDS.past + ' ';
+    //     }
+    //     else if (wordMinutes == 45) {
+    //         res = WORDS.it_is_a + ' ' + WORDS.quarter + ' ' + WORDS.to + ' ';
+    //         wordHours = (wordHours + 1) % 24;
+    //     }
+    //     else if (wordMinutes == 30) {
+    //         res = WORDS.it_is + ' ' + WORDS.half + ' ' + WORDS.past + ' ';
+    //     }
+    //     else if (wordMinutes < 30) {
+    //         res = WORDS.it_is + ' ' + appendNumber(wordMinutes) + ' ' + WORDS.past + ' ';
+    //     }
+    //     else {
+    //         res = WORDS.it_is + ' ' + appendNumber(60 - wordMinutes) + ' ' + WORDS.to + ' ';
+    //         wordHours = (wordHours + 1) % 24;
+    //     }
+    // }
+    // else {
+    //     res = WORDS.it_is + ' ';
+    // }
 
-    if (wordMinutes == 0 && !(wordHours == 0 || wordHours == 12)) {
-        res = res + ' ' + WORDS.o_clock;
-    }
+    // if (wordHours == 0) {
+    //     res += WORDS.midnight;
+    // }
+    // else if (wordHours == 12) {
+    //     res += WORDS.noon;
+    // }
+    // else {
+    //     res += appendNumber(wordHours % 12);
+    // }
+
+    // if (wordMinutes == 0 && !(wordHours == 0 || wordHours == 12)) {
+    //     res = res + ' ' + WORDS.o_clock;
+    // }
 
     return res;
 }
@@ -234,7 +270,7 @@ function updateClockAndDate() {
     let date = GLib.DateTime.new_now(tz);
     let str = timeToWords(date.get_hour(), date.get_minute());
 
-    if (settings.get_boolean('clock-show-date')) {
+    if (settings.get_boolean('clock-show-date')){
         str += (' ' + WORDS.on + ' ' + dateToWords(date.get_day_of_week(), date.get_day_of_month(), date.get_month()));
     }
 
